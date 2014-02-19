@@ -15,7 +15,7 @@ function main(request, response, next) {
 		case 'GET': get(request, response); break;
 		case 'POST': post(request, response); break;
 		case 'DELETE': del(request, response); break;
-		case 'PUT': post(request, response); break;
+		case 'PUT': put(request, response); break;
 	}
 };
 
@@ -40,23 +40,55 @@ function post(request, response) {
 	// var newSessionId = login.login('xxx', 'xxx@gmail.com');
 	// TODO: set new session id to the 'session_id' cookie in the response
 	// replace "Logged In" response with response.end(login.hello(newSessionId));
+        var username = request.body.name;
+	var usermail = request.body.email;
+	// var newSessionId = login.login('xxx', 'xxx@gmail.com');
+	var newSessionId = login.login(username, usermail);
+	response.setHeader('Content-Type', 'text/html');
+	response.setHeader('Set-Cookie', 'session_id=' + newSessionId);
+	// replace "Logged In" response with response.end(login.hello(newSessionId));
+	response.end(login.hello(newSessionId));
+	//response.end("Logged In\n");
 
-	response.end("Logged In\n");
 };
 
 function del(request, response) {
-	console.log("DELETE:: Logout from the server");
- 	// TODO: remove session id via login.logout(xxx)
- 	// No need to set session id in the response cookies since you just logged out!
-
-  	response.end('Logged out from the server\n');
+	
+ 	var cookies = request.cookies;
+        console.log(cookies);
+        if ('session_id' in cookies) {
+                var sid = cookies['session_id'];
+                var check=login.logout(sid);
+                if(check){
+                        console.log("DELETE:: Logout from the server");
+                        response.setHeader('Content-Type', 'text/html');
+                // No need to set session id in the response cookies since you just logged out!
+                        response.end('Logged out from the server\n');
+                }
+                else{
+                console.log("Session invalid");
+                response.end('Session invalid\n');
+                }
+        }
 };
 
 function put(request, response) {
 	console.log("PUT:: Re-generate new seesion_id for the same user");
 	// TODO: refresh session id; similar to the post() function
+        var cookies = request.cookies;
+    console.log(cookies);
+    if ('session_id' in cookies) {
+        	var sid = cookies['session_id'];
+			var newSid = login.refresh(sid);
+			response.setHeader('Content-Type', 'text/html');
+			response.setHeader('Set-Cookie', 'session_id=' + newSid);
+			response.end("Re-freshed session id\n");
+	}
+	else{
+			cosole.log("Session invalid\n");
+			response.end('Session invalid\n');
+	}
 
-	response.end("Re-freshed session id\n");
 };
 
 app.listen(8000);
