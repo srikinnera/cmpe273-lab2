@@ -6,7 +6,9 @@ var app = connect();
 app.use(connect.json()); // Parse JSON request body into `request.body`
 app.use(connect.urlencoded()); // Parse form in request body into `request.body`
 app.use(connect.cookieParser()); // Parse cookies in the request headers into `request.cookies`
+app.use(connect.bodyParser());
 app.use(connect.query()); // Parse query string into `request.query`
+
 
 app.use('/', main);
 
@@ -25,6 +27,7 @@ function get(request, response) {
 	if ('session_id' in cookies) {
 		var sid = cookies['session_id'];
 		if ( login.isLoggedIn(sid) ) {
+			response.setHeader('Content-Type', 'text/html');
 			response.setHeader('Set-Cookie', 'session_id=' + sid);
 			response.end(login.hello(sid));	
 		} else {
@@ -36,11 +39,8 @@ function get(request, response) {
 };
 
 function post(request, response) {
-	// TODO: read 'name and email from the request.body'
-	// var newSessionId = login.login('xxx', 'xxx@gmail.com');
-	// TODO: set new session id to the 'session_id' cookie in the response
-	// replace "Logged In" response with response.end(login.hello(newSessionId));
-        var username = request.body.name;
+
+	var username = request.body.name;
 	var usermail = request.body.email;
 	// var newSessionId = login.login('xxx', 'xxx@gmail.com');
 	var newSessionId = login.login(username, usermail);
@@ -49,12 +49,11 @@ function post(request, response) {
 	// replace "Logged In" response with response.end(login.hello(newSessionId));
 	response.end(login.hello(newSessionId));
 	//response.end("Logged In\n");
-
 };
 
 function del(request, response) {
-	
- 	var cookies = request.cookies;
+
+        var cookies = request.cookies;
         console.log(cookies);
         if ('session_id' in cookies) {
                 var sid = cookies['session_id'];
@@ -72,10 +71,10 @@ function del(request, response) {
         }
 };
 
+
 function put(request, response) {
-	console.log("PUT:: Re-generate new seesion_id for the same user");
-	// TODO: refresh session id; similar to the post() function
-        var cookies = request.cookies;
+	console.log("PUT:: Re-generate new session_id for the same user");
+	var cookies = request.cookies;
     console.log(cookies);
     if ('session_id' in cookies) {
         	var sid = cookies['session_id'];
@@ -88,7 +87,7 @@ function put(request, response) {
 			cosole.log("Session invalid\n");
 			response.end('Session invalid\n');
 	}
-
+	
 };
 
 app.listen(8000);
