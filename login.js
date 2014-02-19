@@ -1,4 +1,3 @@
-
 /**
  * Login Class
  */
@@ -38,14 +37,53 @@ Login.prototype.login = function(_name, _email) {
 };
 
 /**
+ * Refresh the session id for the given user.
+ */
+ Login.prototype.refresh = function(sessionId) {
+   /*
+    * Refresh session id and set it into sessionMap with name and email
+    */
+    if(sessionId in this.sessionMap){
+        var username  = this.sessionMap[sessionId].name;
+        var useremail = this.sessionMap[sessionId].email;
+        var newSId    = new Date().getTime();
+        this.sessionMap[newSId] = { name: username, email: useremail } 
+        /* Delete previous session id from map */
+        delete this.sessionMap[sessionId];
+        console.log('new session id ' + newSId + ' for login::' + useremail);
+        return newSId;
+    }
+    else
+    {
+        console.log("Session id doesnt exist");
+        return 0;
+    }
+        
+};
+
+/**
  * Logout from the server
  */ 
 Login.prototype.logout = function(sessionId) {
-	console.log('logout::' + sessionId);
+
+        var check = false;
+        if(sessionId in this.sessionMap)
+        {
+                delete this.sessionMap[sessionId];
+                console.log('logout::' + sessionId);
+                check = true;
+        }
+        else
+        {
+                console.log('Session id not found\n');
+                check = false;
+        }
+        return check;
    /*
-	* TODO: Remove the given sessionId from the sessionMap
-	*/
+        * TODO: Remove the given sessionId from the sessionMap
+        */
 };
+
 
 // Export the Login class
 module.exports = new Login();
